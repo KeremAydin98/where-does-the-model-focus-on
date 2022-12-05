@@ -1,4 +1,9 @@
 from torchvision import transforms as T
+from torch.utils.data import Dataset, DataLoader
+from pathlib import Path
+import torch
+import cv2
+import os
 
 """
 Training data augmentation
@@ -36,4 +41,53 @@ val_tfms = T.Compose([
     T.Normalize(mean=[0.5, 0.5, 0.5],
                 std=[0.5, 0.5, 0.5])
 ])
+
+
+class FruitImages(Dataset):
+
+    """
+    Class to fetch and preprocess the dataset
+    """
+
+    def __init__(self, files, transform=None):
+
+        self.files = files
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, ix):
+
+        fpath = self.files[ix]
+
+        # Extract the class name
+        path = Path(fpath)
+        class_name = os.path.basename(path.parent.absolute())
+
+        # Extract the image
+        img = cv2.imread(path)
+        img = torch.tensor(img).permute(2,0,1)
+
+        return img.to(device), class_name
+
+    def collate_fn(self, batch):
+
+        imgs, classes = list(zip(*batch))
+
+        id2int = dict.fromkeys(classes)
+
+        value = 0
+        for k, v in id2int.items():
+            id2int[k] = value
+            value += 1
+
+        if self.transform:
+            imgs = [self.transform(img)[None] for img in imgs]
+
+        classes = [torch.tensor(id2int[key]) for key in classes]
+
+        imgs, classes = [torch.cat(i).to(device) for i in [imgs, classes]]
+
+        return imgs, classes
 
