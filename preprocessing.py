@@ -4,6 +4,8 @@ from pathlib import Path
 import torch
 import cv2
 import os
+import config
+import numpy as np
 
 """
 Training data augmentation
@@ -33,7 +35,7 @@ train_tf = T.Compose([
 Preprocessing of validation images
 """
 
-val_tfms = T.Compose([
+val_tf = T.Compose([
     T.ToPILImage(),
     T.Resize(128),
     T.CenterCrop(128),
@@ -75,19 +77,24 @@ class FruitImages(Dataset):
 
         imgs, classes = list(zip(*batch))
 
-        id2int = dict.fromkeys(classes)
+        self.id2int = dict.fromkeys(classes)
 
         value = 0
-        for k, v in id2int.items():
-            id2int[k] = value
+        for k, v in self.id2int.items():
+            self.id2int[k] = value
             value += 1
 
         if self.transform:
             imgs = [self.transform(img)[None] for img in imgs]
 
-        classes = [torch.tensor(id2int[key]) for key in classes]
+        classes = [torch.tensor(self.id2int[key]) for key in classes]
 
+        # Concatenates the given sequence of seq tensors in the given dimension.
         imgs, classes = [torch.cat(i).to(device) for i in [imgs, classes]]
 
         return imgs, classes
+
+
+
+
 
