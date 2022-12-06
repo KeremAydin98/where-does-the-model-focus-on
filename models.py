@@ -4,6 +4,14 @@ import torch
 
 def convBlock(ni, no):
 
+    """
+    Created a batch of layers that are repeated
+
+    :param ni: Input size
+    :param no: output size
+    :return: batch of layers
+    """
+
     return nn.Sequential(nn.Conv2d(ni, no, kernel_size=3, padding=1),
                          nn.ReLU(),
                          nn.BatchNorm2d(no),
@@ -28,6 +36,7 @@ class FruitClassifier(nn.Module):
                                    # inplace=True means that it will modify the input directly,
                                    # without allocating any additional output.
                                    nn.ReLU(inplace=True),
+                                   # There is no need of softmax layer since CrossEntropyLoss does it anyway
                                    nn.Linear(256, len(id2int)))
 
         self.loss_fn = nn.CrossEntropyLoss()
@@ -38,7 +47,11 @@ class FruitClassifier(nn.Module):
 
     def compute_metrics(self, preds, targets):
 
+        # Calculating loss
         loss = self.loss_fn(preds, targets)
+
+        # Calculating accuracy
         acc = (torch.max(preds, 1)[1] == targets).float().mean()
+
         return loss, acc
 

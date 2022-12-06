@@ -51,10 +51,11 @@ class FruitImages(Dataset):
     Class to fetch and preprocess the dataset
     """
 
-    def __init__(self, files, transform=None):
+    def __init__(self, files, transform=None, device='cpu'):
 
         self.files = files
         self.transform = transform
+        self.device = device
 
     def __len__(self):
         return len(self.files)
@@ -71,7 +72,7 @@ class FruitImages(Dataset):
         img = cv2.imread(path)
         img = torch.tensor(img).permute(2,0,1)
 
-        return img.to(device), class_name
+        return img.to(self.device), class_name
 
     def collate_fn(self, batch):
 
@@ -90,7 +91,7 @@ class FruitImages(Dataset):
         classes = [torch.tensor(self.id2int[key]) for key in classes]
 
         # Concatenates the given sequence of seq tensors in the given dimension.
-        imgs, classes = [torch.cat(i).to(device) for i in [imgs, classes]]
+        imgs, classes = [torch.cat(i).to(self.device) for i in [imgs, classes]]
 
         return imgs, classes
 
