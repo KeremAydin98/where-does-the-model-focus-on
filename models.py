@@ -1,0 +1,44 @@
+import torch.nn as nn
+import torch
+
+
+def convBlock(ni, no):
+
+    return nn.Sequential(nn.Conv2d(ni, no, kernel_size=3, padding=1),
+                         nn.ReLU(),
+                         nn.BatchNorm2d(no),
+                         nn.MaxPool2d(2),
+                         nn.Dropout(0.2))
+
+
+class FruitClassifier(nn.Module):
+
+    def __init__(self, id2int):
+
+        super().__init__()
+
+        self.model = nn.Sequential(convBlock(3,64),
+                                   convBlock(64,64),
+                                   convBlock(128,256),
+                                   convBlock(256,512),
+                                   convBlock(512, 64),
+                                   nn.Flatten(),
+                                   nn.Linear(256,256),
+                                   nn.Dropout(0.2),
+                                   # inplace=True means that it will modify the input directly,
+                                   # without allocating any additional output.
+                                   nn.ReLU(inplace=True),
+                                   nn.Linear(256, len(id2int)))
+
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, x):
+
+        return self.model(x)
+
+    def compute_metrics(self, preds, targets):
+
+        loss = self.loss_fn(preds, targets)
+        acc = (torch.max(preds, 1)[1] == targets).float().mean()
+        return loss, acc
+
