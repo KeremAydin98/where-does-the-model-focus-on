@@ -1,3 +1,3 @@
 
-train_path = "dataset/train"
-val_path = "dataset/test"
+train_path = "dataset/train/*/*.jpeg"
+val_path = "dataset/test/*/*.jpeg"

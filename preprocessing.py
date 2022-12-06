@@ -56,6 +56,7 @@ class FruitImages(Dataset):
         self.files = files
         self.transform = transform
         self.device = device
+        self.id2int = {}
 
     def __len__(self):
         return len(self.files)
@@ -66,10 +67,10 @@ class FruitImages(Dataset):
 
         # Extract the class name
         path = Path(fpath)
-        class_name = os.path.basename(path.parent.absolute())
+        class_name = path.parent.parts[-1]
 
         # Extract the image
-        img = cv2.imread(path)
+        img = cv2.imread(str(path))
         img = torch.tensor(img).permute(2,0,1)
 
         return img.to(self.device), class_name
