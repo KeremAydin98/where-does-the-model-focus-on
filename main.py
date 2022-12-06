@@ -40,6 +40,23 @@ def train_batch(model, data, optimizer, criterion):
 
     return loss.item(), acc.item()
 
+@torch.no_grad()
+def validate_batch(model, data, criterion):
+
+    # Prepare model for evaluation
+    model.eval()
+
+    # Extract images and labels from data
+    imgs, labels, _ = data
+
+    # Predictions of the model
+    preds = model(imgs)
+
+    # Calculating loss and accuracy
+    loss, acc = criterion(preds, labels)
+
+    return loss.item(), acc.item()
+
 
 
 
