@@ -8,7 +8,6 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Load train and validation files
 train_files = glob(config.train_path)
-np.random.shuffle(train_files)
 
 id2int = len(train_files)
 
@@ -17,8 +16,8 @@ val_files = glob(config.val_path)
 train_dataset = FruitImages(train_files, transform=train_tf, device=device)
 val_dataset = FruitImages(val_files, transform=val_tf, device=device)
 
-train_dl = DataLoader(train_dataset, batch_size=32, collate_fn=train_dataset.collate_fn)
-val_dl = DataLoader(val_dataset, batch_size=32, collate_fn=val_dataset.collate_fn)
+train_dl = DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=train_dataset.collate_fn, drop_last=True)
+val_dl = DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=val_dataset.collate_fn, drop_last=True)
 
 
 def train_batch(model, data, optimizer, criterion):
@@ -56,6 +55,9 @@ def validate_batch(model, data, criterion):
 
     # Extract images and labels from data
     imgs, labels, _ = data
+
+    imgs = torch.tensor(np.array(imgs))
+    labels = torch.tensor(np.array(labels))
 
     # Predictions of the model
     preds = model(imgs)

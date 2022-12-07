@@ -68,6 +68,7 @@ class FruitImages(Dataset):
 
         # Extract the image
         img = cv2.imread(str(path))
+
         img = torch.tensor(img).permute(2,0,1)
 
         return img.to(self.device), class_name
