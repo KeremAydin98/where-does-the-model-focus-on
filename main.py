@@ -1,6 +1,7 @@
 from preprocessing import *
 from models import FruitClassifier
 from glob import glob
+import config
 
 # Set the device
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -8,6 +9,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # Load train and validation files
 train_files = glob(config.train_path)
 np.random.shuffle(train_files)
+
+id2int = len(train_files)
 
 val_files = glob(config.val_path)
 
@@ -25,6 +28,9 @@ def train_batch(model, data, optimizer, criterion):
 
     # Extract images and labels from data separately
     imgs, labels, _ = data
+
+    imgs = torch.tensor(np.array(imgs))
+    labels = torch.tensor(np.array(labels))
 
     # Forward propagation
     preds = model(imgs)
@@ -61,7 +67,7 @@ def validate_batch(model, data, criterion):
 
 
 # Instantiate the model
-model = FruitClassifier(id2int=train_dataset.id2int).to(device)
+model = FruitClassifier(id2int=id2int).to(device)
 criterion = model.compute_metrics
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 n_epochs = 2

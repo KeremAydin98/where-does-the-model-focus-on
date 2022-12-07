@@ -3,8 +3,6 @@ from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
 import torch
 import cv2
-import os
-import config
 import numpy as np
 
 """
@@ -56,7 +54,6 @@ class FruitImages(Dataset):
         self.files = files
         self.transform = transform
         self.device = device
-        self.id2int = {}
 
     def __len__(self):
         return len(self.files)
@@ -77,24 +74,24 @@ class FruitImages(Dataset):
 
     def collate_fn(self, batch):
 
-        imgs, classes = list(zip(*batch))
+        _imgs, classes = list(zip(*batch))
 
-        self.id2int = dict.fromkeys(classes)
+        id2int = dict.fromkeys(classes)
 
         value = 0
-        for k, v in self.id2int.items():
-            self.id2int[k] = value
+        for k, v in id2int.items():
+            id2int[k] = value
             value += 1
 
         if self.transform:
-            imgs = [self.transform(img)[None] for img in imgs]
+            imgs = [np.array(self.transform(img)) for img in _imgs]
 
-        classes = [torch.tensor(self.id2int[key]) for key in classes]
+        classes = [torch.tensor(id2int[key]) for key in classes]
 
         # Concatenates the given sequence of seq tensors in the given dimension.
-        imgs, classes = [torch.cat(i).to(self.device) for i in [imgs, classes]]
+        #imgs, classes = [torch.stack(i).to(self.device) for i in [imgs, classes]]
 
-        return imgs, classes
+        return imgs, classes, _imgs
 
 
 

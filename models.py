@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-
+import numpy as np
 
 def convBlock(ni, no):
 
@@ -26,18 +26,18 @@ class FruitClassifier(nn.Module):
         super().__init__()
 
         self.model = nn.Sequential(convBlock(3,64),
-                                   convBlock(64,64),
+                                   convBlock(64,128),
                                    convBlock(128,256),
                                    convBlock(256,512),
                                    convBlock(512, 64),
                                    nn.Flatten(),
-                                   nn.Linear(256,256),
+                                   nn.Linear(1024,256),
                                    nn.Dropout(0.2),
                                    # inplace=True means that it will modify the input directly,
                                    # without allocating any additional output.
                                    nn.ReLU(inplace=True),
                                    # There is no need of softmax layer since CrossEntropyLoss does it anyway
-                                   nn.Linear(256, len(id2int)))
+                                   nn.Linear(256, id2int))
 
         self.loss_fn = nn.CrossEntropyLoss()
 
