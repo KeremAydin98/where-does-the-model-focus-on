@@ -3,21 +3,7 @@ from models import FruitClassifier
 from glob import glob
 import config
 
-# Set the device
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# Load train and validation files
-train_files = glob(config.train_path)
-
-id2int = len(train_files)
-
-val_files = glob(config.val_path)
-
-train_dataset = FruitImages(train_files, transform=train_tf, device=device)
-val_dataset = FruitImages(val_files, transform=val_tf, device=device)
-
-train_dl = DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=train_dataset.collate_fn, drop_last=True)
-val_dl = DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=val_dataset.collate_fn, drop_last=True)
 
 
 def train_batch(model, data, optimizer, criterion):
@@ -67,28 +53,56 @@ def validate_batch(model, data, criterion):
 
     return loss.item(), acc.item()
 
+def training():
+    # Set the device
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# Instantiate the model
-model = FruitClassifier(id2int=id2int).to(device)
-criterion = model.compute_metrics
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-n_epochs = 2
+    # Load train and validation files
+    train_files = glob(config.train_path)
 
-# Starts the training
-for epoch in range(n_epochs):
+    id2int = len(train_files)
 
-    N = len(train_dl)
+    val_files = glob(config.val_path)
 
-    for bx, data in enumerate(train_dl):
+    train_dataset = FruitImages(train_files, transform=train_tf, device=device)
+    val_dataset = FruitImages(val_files, transform=val_tf, device=device)
 
-        loss, acc = train_batch(model, data, optimizer, criterion)
+    train_dl = DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=train_dataset.collate_fn, drop_last=True)
+    val_dl = DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=val_dataset.collate_fn, drop_last=True)
 
-        print(f"Epoch: {epoch}/{n_epochs}, Batch: {bx+1}/{N}, Loss: {loss}, Accuracy: {acc}")
 
-    N = len(val_dl)
+    # Instantiate the model
+    model = FruitClassifier(id2int=id2int).to(device)
+    criterion = model.compute_metrics
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    n_epochs = 2
 
-    for bx, data in enumerate(val_dl):
+    # Starts the training
+    for epoch in range(n_epochs):
 
-        loss, acc = validate_batch(model, data, criterion)
+        N = len(train_dl)
 
-        print(f"Epoch: {epoch}/{n_epochs}, Batch: {bx+1}/{N}, Val_loss: {loss}, Val_accuracy: {acc}")
+        for bx, data in enumerate(train_dl):
+
+            loss, acc = train_batch(model, data, optimizer, criterion)
+
+            print(f"Epoch: {epoch}/{n_epochs}, Batch: {bx+1}/{N}, Loss: {loss}, Accuracy: {acc}")
+
+        N = len(val_dl)
+
+        for bx, data in enumerate(val_dl):
+
+            loss, acc = validate_batch(model, data, criterion)
+
+            print(f"Epoch: {epoch}/{n_epochs}, Batch: {bx+1}/{N}, Val_loss: {loss}, Val_accuracy: {acc}")
+
+
+    """
+    Saving the model
+    """
+
+    torch.save(model.state_dict(), "models/model.pth")
+
+
+if __name__ == "__main__":
+    training()
