@@ -69,7 +69,6 @@ def training():
     train_dl = DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=train_dataset.collate_fn, drop_last=True)
     val_dl = DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=val_dataset.collate_fn, drop_last=True)
 
-
     # Instantiate the model
     model = FruitClassifier(id2int=id2int).to(device)
     criterion = model.compute_metrics
