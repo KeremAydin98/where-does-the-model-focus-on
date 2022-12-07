@@ -2,8 +2,7 @@ from preprocessing import *
 from models import FruitClassifier
 from glob import glob
 import config
-
-
+from tqdm import tqdm
 
 
 def train_batch(model, data, optimizer, criterion):
@@ -75,26 +74,22 @@ def training():
     model = FruitClassifier(id2int=id2int).to(device)
     criterion = model.compute_metrics
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    n_epochs = 2
+    n_epochs = 10
 
     # Starts the training
     for epoch in range(n_epochs):
 
-        N = len(train_dl)
-
-        for bx, data in enumerate(train_dl):
+        for data in tqdm(train_dl):
 
             loss, acc = train_batch(model, data, optimizer, criterion)
 
-            print(f"Epoch: {epoch}/{n_epochs}, Batch: {bx+1}/{N}, Loss: {loss}, Accuracy: {acc}")
+        print(f"Epoch: {epoch+1}/{n_epochs}, Loss: {loss}, Accuracy: {acc}")
 
-        N = len(val_dl)
-
-        for bx, data in enumerate(val_dl):
+        for data in tqdm(val_dl):
 
             loss, acc = validate_batch(model, data, criterion)
 
-            print(f"Epoch: {epoch}/{n_epochs}, Batch: {bx+1}/{N}, Val_loss: {loss}, Val_accuracy: {acc}")
+        print(f"Epoch: {epoch+1}/{n_epochs}, Val_loss: {loss}, Val_accuracy: {acc}")
 
 
     """
