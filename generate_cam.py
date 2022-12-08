@@ -1,6 +1,8 @@
+import config
 from models import *
 from preprocessing import *
 from glob import glob
+import torchvision
 
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 
@@ -18,35 +20,50 @@ The star expression is used to unpack containers. In your case it would be equal
 img2fmap = nn.Sequential(*(list(model.model[:4]) + list(model.model[4][:2])))
 
 # Test path
-test_files = glob("dataset/predict/*/*.jpeg")
+test_files = glob(config.test_path)
 # Load test dataset
-test_ds = FruitClassifier(test_files, transform=val_tf, device=device)
+test_ds = FruitImages(test_files, device=device)
 
-print(test_ds[0])
 
 def img2cam(x):
 
     model.eval()
 
+    # Prediction of the model
     prediction = model(x)
 
-    heatmaps = []
+    # Extracted features from the fourth convblock of the model
+    activations = img2fmap(x)
 
-    extracted_features = img2fmap(x)
-
+    # Argmax of the prediction
     pred = prediction.max(-1)[-1]
 
+    # Start the calculation of the gradient by
     model.zero_grad()
 
-    prediction[0, pred].backward(retain_graph=True)
+    # Computes the gradient of current tensor w.r.t. graph leaves.
+    # As long as you use retain_graph=True in your backward method, you can do backward any time you want
+    prediction[0][pred].backward(retain_graph=True)
 
-    pooled_grads = model.model[-7][1].weight.grad.data.mean((0,2,3))
+    # .weight() weight of the given layer
+    # .grad() after backward propagation
+    # .mean() takes the mean for given dimensions
+    pooled_grads = model.model[-7][0].weight.grad.mean((0,2,3))
 
-    for i in range(extracted_features.shape[1]):
+    # Multiply each activation map with corresponding gradient average
+    for i in range(activations.shape[1]):
 
-        extracted_features[:,i,:,:] *= pooled_grads[i]
+        activations[:,i,:,:] *= pooled_grads[i]
 
-    heatmap = torch.mean(extracted_features, dim=1)[0].cpu().detach()
+    # Compute the average of all activation maps
+    heatmap = torch.mean(activations, dim=1)[0].cpu().detach()
 
     return heatmap
 
+
+def preprocess_for_cam(img):
+
+    return val_tf(img).float().expand(1,3,128,128)
+
+
+heatmap = img2cam(preprocess_for_cam(test_ds[0][0]))
