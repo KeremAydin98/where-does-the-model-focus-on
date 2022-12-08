@@ -16,3 +16,21 @@ The star expression is used to unpack containers. In your case it would be equal
 """
 img2fmap = nn.Sequential(*(list(model.model[:5]) + list(model.model[4][:2])))
 
+
+def img2cam(x):
+
+    model.eval()
+
+    features = model(x)
+
+    heatmaps = []
+
+    activations = img2fmap(x)
+
+    pred = features.max(-1)[-1]
+
+    model.zero_grad()
+
+    features[0, pred].backward(retain_graph=True)
+
+
