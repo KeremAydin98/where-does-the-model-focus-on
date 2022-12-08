@@ -75,7 +75,7 @@ def training():
     model = FruitClassifier(id2int=id2int).to(device)
     criterion = model.compute_metrics
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    n_epochs = 10
+    n_epochs = 5
 
     # Starts the training
     for epoch in range(n_epochs):

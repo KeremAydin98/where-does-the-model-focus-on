@@ -15,13 +15,9 @@ train_tf = T.Compose([
     T.Resize(128),
     # Crop the center part
     T.CenterCrop(128),
-    # Data augment on colors
-    T.ColorJitter(brightness=(0.95, 1.05),
-                  contrast=(0.95,1.05),
-                  saturation=(0.95, 1.05),
-                  hue=0.05),
-    # Random movement
-    T.RandomAffine(5, translate=(0.01,0.1)),
+    # Random rotation
+    T.RandomRotation(30),
+    T.RandomHorizontalFlip(),
     # Scale the image between [0,1] values
     T.ToTensor(),
     # Normalization

@@ -5,6 +5,8 @@ from glob import glob
 import cv2
 import matplotlib.pyplot as plt
 from torchvision import transforms as T
+import warnings
+warnings.filterwarnings("ignore")
 
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 
