@@ -78,17 +78,25 @@ def training():
     # Starts the training
     for epoch in range(n_epochs):
 
-        for data in tqdm(train_dl):
+        losses = []
+        accs = []
 
+        for data in train_dl:
             loss, acc = train_batch(model, data, optimizer, criterion)
+            losses.append(loss)
+            accs.append(acc)
 
-        print(f"Epoch: {epoch+1}/{n_epochs}, Loss: {loss}, Accuracy: {acc}")
+        val_losses = []
+        val_accs = []
 
-        for data in tqdm(val_dl):
-
+        for data in val_dl:
             loss, acc = validate_batch(model, data, criterion)
+            val_losses.append(loss)
+            val_accs.append(acc)
 
-        print(f"Epoch: {epoch+1}/{n_epochs}, Val_loss: {loss}, Val_accuracy: {acc}")
+        print(f"Epoch: {epoch + 1}/{n_epochs}, Loss: {sum(losses) / len(losses)},",
+              f" Val_loss: {sum(val_losses) / len(val_losses)},",
+              f" Accuracy: {sum(accs) / len(accs)}, Val_accuracy: {sum(val_accs) / len(val_accs)}")
 
 
     """
