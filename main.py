@@ -3,7 +3,9 @@ from models import FruitClassifier
 from glob import glob
 import config
 from tqdm import tqdm
-
+import os
+import warnings
+warnings.filterwarnings("ignore")
 
 def train_batch(model, data, optimizer, criterion):
 
@@ -59,7 +61,7 @@ def training():
     # Load train and validation files
     train_files = glob(config.train_path)
 
-    id2int = len(train_files)
+    id2int = len(os.listdir(config.train_files))
 
     val_files = glob(config.val_path)
 
@@ -81,7 +83,7 @@ def training():
         losses = []
         accs = []
 
-        for data in train_dl:
+        for data in tqdm(train_dl):
             loss, acc = train_batch(model, data, optimizer, criterion)
             losses.append(loss)
             accs.append(acc)
@@ -89,7 +91,7 @@ def training():
         val_losses = []
         val_accs = []
 
-        for data in val_dl:
+        for data in tqdm(val_dl):
             loss, acc = validate_batch(model, data, criterion)
             val_losses.append(loss)
             val_accs.append(acc)

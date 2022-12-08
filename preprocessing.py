@@ -85,12 +85,12 @@ class FruitImages(Dataset):
             value += 1
 
         if self.transform:
-            imgs = [np.array(self.transform(img)) for img in _imgs]
+            imgs = [torch.tensor(self.transform(img)) for img in _imgs]
 
         classes = [torch.tensor(id2int[key]) for key in classes]
 
         # Concatenates the given sequence of seq tensors in the given dimension.
-        #imgs, classes = [torch.stack(i).to(self.device) for i in [imgs, classes]]
+        imgs, classes = [torch.stack(i).to(self.device) for i in [imgs, classes]]
 
         return imgs, classes, _imgs
 
