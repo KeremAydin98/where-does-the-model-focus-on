@@ -77,14 +77,13 @@ def upsampleHeatMap(map, img):
 
     min, max = map.min(), map.max()
 
-    #map = 255 * ((map - min) / (max-min))
+    map = 255 * ((map - min) / (max-min))
 
     #map = torch.tensor(map)
 
     map = np.uint8(map)
 
     map = cv2.resize(map, (image_size, image_size))
-
 
     map = cv2.applyColorMap(255-map, cv2.COLORMAP_JET)
     map = np.uint8(map)
@@ -99,9 +98,9 @@ f, axs = plt.subplots(2,4)
 
 for i in range(4):
 
-    image = np.array(transform(z[i]).permute(1,2,0))
+    image = np.array(transform(z[i+4]).permute(1,2,0))
 
-    heatmap = img2cam(torch.tensor(x[i]).float().expand(1,3,128,128))
+    heatmap = img2cam(torch.tensor(x[i+4]).float().expand(1,3,128,128))
     heatmap = upsampleHeatMap(heatmap, image)
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -109,5 +108,6 @@ for i in range(4):
 
     axs[0,i].imshow(heatmap)
     axs[1,i].imshow(image)
+
 
 plt.show()
