@@ -35,7 +35,13 @@ img2fmap = nn.Sequential(*(list(model.model[:4]) + list(model.model[4][:2])))
 
 Only the channels that are responsible for predicting the correct class will have a high gradient, therefore after extracting these feature maps which are corresponded to that class and upsampling them to our image size, we can examine the place the model focuses on to make a prediction.
 
+The whole process:
+
+![Screenshot 2022-12-09 134735](https://user-images.githubusercontent.com/77073029/206685458-77dee036-dd39-46bf-80ce-0e26a5ff74c7.png)
+
+
 This can also be used when our model performs badly, since it may focus on the wrong objects in a picture. If that's the case, we can either use object detection or cropping to get a better result.
+
 
 ## Some of the results
 
